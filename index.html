@@ -14,6 +14,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+
     <style>
       :root {
         --bg-body: #050505;
@@ -22,7 +23,7 @@
         --offline: #444;
         --text-main: #f0f0f0;
         --transition: all 0.3s ease;
-        --columns: 2;
+        --columns: 3; /* AJUSTADO: Inicializa com 3 colunas */
       }
 
       * {
@@ -66,7 +67,6 @@
         color: var(--accent);
       }
 
-      /* ESTILO DO CONTADOR */
       .user-counter {
         font-size: 0.7rem;
         color: #00ff88;
@@ -217,6 +217,7 @@
           opacity: 0.3;
         }
       }
+
       @media (max-width: 900px) {
         .grid {
           grid-template-columns: 1fr !important;
@@ -247,8 +248,8 @@
           "
         >
           <option value="1">1 Coluna</option>
-          <option value="2" selected>2 Colunas</option>
-          <option value="3">3 Colunas</option>
+          <option value="2">2 Colunas</option>
+          <option value="3" selected>3 Colunas</option>
           <option value="4">4 Colunas</option>
         </select>
       </div>
@@ -269,20 +270,15 @@
     </div>
 
     <script>
-      // Lógica do Contador (Simulação Sênior Dinâmica)
       function updateVisitors() {
         const countElement = document.getElementById("visitorCount");
-        // Gera um número entre 1 e 5 para simular atividade real
         let current = parseInt(countElement.innerText);
         let change = Math.random() > 0.5 ? 1 : -1;
         let next = current + change;
-
         if (next < 1) next = 1;
-        if (next > 15) next = 12; // Limite para manter realista
-
+        if (next > 15) next = 12;
         countElement.innerText = next;
       }
-      // Atualiza a cada 5 segundos
       setInterval(updateVisitors, 5000);
 
       const liveStreams = [
