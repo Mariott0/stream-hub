@@ -23,7 +23,7 @@
         --offline: #444;
         --text-main: #f0f0f0;
         --transition: all 0.3s ease;
-        --columns: 3; /* AJUSTADO: Inicializa com 3 colunas */
+        --columns: 2; /* PADRÃO: Agora inicia com 2 colunas */
       }
 
       * {
@@ -248,8 +248,8 @@
           "
         >
           <option value="1">1 Coluna</option>
-          <option value="2">2 Colunas</option>
-          <option value="3" selected>3 Colunas</option>
+          <option value="2" selected>2 Colunas</option>
+          <option value="3">3 Colunas</option>
           <option value="4">4 Colunas</option>
         </select>
       </div>
@@ -282,12 +282,12 @@
       setInterval(updateVisitors, 5000);
 
       const liveStreams = [
-        { name: "Richard Rasmussen", id: "Jw2rDfL9wOI" },
         { name: "Renato Cariani", id: "KlDGNgb3sU0" },
         { name: "Inverno na Transamazônica", id: "0VBuSao0VSk" },
       ];
 
       const offChannels = [
+        { name: "Richard Rasmussen", id: "RichardRasmussenSelvagem" },
         { name: "Gordox", id: "livesdogordox" },
         { name: "Tonimek", id: "Tonimek" },
         { name: "Rato Borrachudo", id: "ratoborrachudo" },
@@ -297,6 +297,8 @@
       function createCard(st, index, isLive, gridId) {
         const grid = document.getElementById(gridId);
         const uniqueId = isLive ? `live-${index}` : `off-${index}`;
+
+        // Se for canal off, usamos o endpoint de live automática
         const src = isLive
           ? `https://www.youtube.com/embed/${st.id}?autoplay=1&mute=1&rel=0`
           : `https://www.youtube.com/embed/live?channel=${st.id}&autoplay=0&mute=1&rel=0`;
