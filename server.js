@@ -24,6 +24,11 @@ const API_KEY = "AIzaSyBDc6JwcvQis7fCsoNwhxMwXiNt_wy72Jw";
 
 const channels = [
   {
+    name: "Cariani",
+    channelId: "UCPX0gLduKAfgr-HJENa7CFw",
+  },
+
+  {
     name: "ACF Performance",
     channelId: "UCvgSmIdI92W4KnP15fJwfwA",
   },
@@ -37,17 +42,10 @@ const channels = [
     name: "Gordox",
     channelId: "UC0aogS8ogMaDUZKKKLKH8fg",
   },
-  {
-    name: "Tonimek",
-    channelId: "UCwRM1SXROyxSSJqrOTQzILw",
-  },
+
   {
     name: "Richard Rasmussen",
     channelId: "UC13ikrGSy3E2AveqLAI9lqg",
-  },
-  {
-    name: "Cariani",
-    channelId: "UCPX0gLduKAfgr-HJENa7CFw",
   },
 
   {
@@ -56,8 +54,8 @@ const channels = [
   },
 
   {
-    name: "Nathan Mariotto",
-    channelId: "UChVM0HxSPi3ClJVPWCGM5Og",
+    name: "Tonimek",
+    channelId: "UCwRM1SXROyxSSJqrOTQzILw",
   },
 ];
 
@@ -67,16 +65,12 @@ const channels = [
 
 let onlineUsers = 0;
 
-io.on("connection", async (socket) => {
+io.on("connection", (socket) => {
   onlineUsers++;
 
   console.log("Usuário conectado:", onlineUsers);
 
   io.emit("updateUsers", onlineUsers);
-
-  // ENVIA STATUS DAS LIVES IMEDIATAMENTE
-
-  await checkLives();
 
   socket.on("disconnect", () => {
     onlineUsers--;
