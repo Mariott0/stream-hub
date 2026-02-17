@@ -31,6 +31,10 @@ const channels = [
   { name: "Cariani", channelId: "UCPX0gLduKAfgr-HJENa7CFw" },
   { name: "Inverno na Transamazônica", channelId: "UC2qRum_4YU_5RHH83cU2O7Q" },
   { name: "Nathan Mariotto", channelId: "UChVM0HxSPi3ClJVPWCGM5Og" },
+  {
+    name: "Lofi Girl",
+    channelId: "UC4R8DWoMoI7CAwX8_LjQHig",
+  },
 ];
 
 // ============================
