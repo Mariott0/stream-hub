@@ -23,42 +23,60 @@ const io = new Server(server, {
 const API_KEY = "AIzaSyBDc6JwcvQis7fCsoNwhxMwXiNt_wy72Jw";
 
 const channels = [
-  { name: "ACF Performance", channelId: "UCvgSmIdI92W4KnP15fJwfwA" },
-  { name: "Rato Borrachudo", channelId: "UCDt4dFdsJyjjA8mQULkOLLw" },
-  { name: "Gordox", channelId: "UC0aogS8ogMaDUZKKKLKH8fg" },
-  { name: "Tonimek", channelId: "UCwRM1SXROyxSSJqrOTQzILw" },
-  { name: "Richard Rasmussen", channelId: "UC13ikrGSy3E2AveqLAI9lqg" },
-  { name: "Cariani", channelId: "UCPX0gLduKAfgr-HJENa7CFw" },
-  { name: "Inverno na Transamazônica", channelId: "UC2qRum_4YU_5RHH83cU2O7Q" },
-  { name: "Nathan Mariotto", channelId: "UChVM0HxSPi3ClJVPWCGM5Og" },
   {
-    name: "Lofi Girl",
-    channelId: "UC4R8DWoMoI7CAwX8_LjQHig",
+    name: "ACF Performance",
+    channelId: "UCvgSmIdI92W4KnP15fJwfwA",
+  },
+
+  {
+    name: "Rato Borrachudo",
+    channelId: "UCDt4dFdsJyjjA8mQULkOLLw",
+  },
+
+  {
+    name: "Gordox",
+    channelId: "UC0aogS8ogMaDUZKKKLKH8fg",
+  },
+  {
+    name: "Tonimek",
+    channelId: "UCwRM1SXROyxSSJqrOTQzILw",
+  },
+  {
+    name: "Richard Rasmussen",
+    channelId: "UC13ikrGSy3E2AveqLAI9lqg",
+  },
+  {
+    name: "Cariani",
+    channelId: "UCPX0gLduKAfgr-HJENa7CFw",
+  },
+
+  {
+    name: "Inverno na Transamazônica",
+    channelId: "UC2qRum_4YU_5RHH83cU2O7Q",
+  },
+
+  {
+    name: "Nathan Mariotto",
+    channelId: "UChVM0HxSPi3ClJVPWCGM5Og",
   },
 ];
 
 // ============================
-// CONTROLE GLOBAL
+// CONTADOR ONLINE
 // ============================
 
 let onlineUsers = 0;
-let lastResult = []; // <-- CORREÇÃO CRÍTICA
 
-// ============================
-// SOCKET CONNECTION
-// ============================
-
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   onlineUsers++;
 
   console.log("Usuário conectado:", onlineUsers);
 
   io.emit("updateUsers", onlineUsers);
 
-  // envia status atual imediatamente
-  if (lastResult.length > 0) {
-    socket.emit("liveUpdate", lastResult);
-  }
+  // ENVIA STATUS DAS LIVES IMEDIATAMENTE
+
+  await checkLives();
 
   socket.on("disconnect", () => {
     onlineUsers--;
@@ -70,12 +88,14 @@ io.on("connection", (socket) => {
 });
 
 // ============================
-// VERIFICAR LIVES
+// VERIFICAR LIVES AUTOMATICO
 // ============================
 
 async function checkLives() {
   try {
-    const requests = channels.map((ch) => {
+    let result = [];
+
+    for (const ch of channels) {
       const url =
         `https://www.googleapis.com/youtube/v3/search` +
         `?part=snippet` +
@@ -84,53 +104,34 @@ async function checkLives() {
         `&type=video` +
         `&key=${API_KEY}`;
 
-      return axios
-        .get(url)
-        .then((res) => {
-          if (res.data.items.length > 0) {
-            return {
-              name: ch.name,
-              live: true,
-              videoId: res.data.items[0].id.videoId,
-            };
-          }
+      const res = await axios.get(url);
 
-          return {
-            name: ch.name,
-            live: false,
-            channelId: ch.channelId,
-          };
-        })
-        .catch(() => {
-          return {
-            name: ch.name,
-            live: false,
-            channelId: ch.channelId,
-          };
+      if (res.data.items.length > 0) {
+        result.push({
+          name: ch.name,
+          live: true,
+          videoId: res.data.items[0].id.videoId,
         });
-    });
+      } else {
+        result.push({
+          name: ch.name,
+          live: false,
+          channelId: ch.channelId,
+        });
+      }
+    }
 
-    const result = await Promise.all(requests);
-
-    // salva global
-    lastResult = result;
-
-    // envia para todos clientes
     io.emit("liveUpdate", result);
 
     console.log("Lives verificadas:", result);
   } catch (err) {
-    console.log("Erro geral:", err.message);
+    console.log("Erro ao verificar lives", err.message);
   }
 }
 
-// ============================
-// INTERVALO
-// ============================
+// verifica a cada 30 segundos
 
-// verifica a cada 60 segundos (seguro para produção)
-
-setInterval(checkLives, 60000);
+setInterval(checkLives, 30000);
 
 // ============================
 // ROTA TESTE
@@ -149,6 +150,5 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log("Servidor rodando na porta", PORT);
 
-  // executa imediatamente ao iniciar
   checkLives();
 });
