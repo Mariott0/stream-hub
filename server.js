@@ -20,7 +20,7 @@ const io = new Server(server, {
 // CONFIG YOUTUBE API
 // ============================
 
-const API_KEY = "AIzaSyBDc6JwcvQis7fCsoNwhxMwXiNt_wy72Jw";
+const API_KEY = "AIzaSyDiinEeWXjCcB5q4lie6jFQbxjY1N6tKJY";
 
 const channels = [
   {
