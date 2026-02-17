@@ -55,7 +55,6 @@
         display: flex;
         flex-direction: column;
       }
-
       .logo {
         font-size: 1.5rem;
         font-weight: 800;
@@ -67,28 +66,37 @@
         color: var(--accent);
       }
 
+      /* CONTADOR REFEITO: MAIS ESTÁVEL E PROFISSIONAL */
       .user-counter {
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         color: #00ff88;
-        font-weight: 600;
+        font-weight: 700;
         display: flex;
         align-items: center;
         gap: 6px;
-        margin-top: 2px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        margin-top: 4px;
+        letter-spacing: 0.5px;
+        background: rgba(0, 255, 136, 0.05);
+        padding: 2px 8px;
+        border-radius: 4px;
+        width: fit-content;
       }
       .user-counter i {
-        animation: blink 2s infinite;
+        animation: pulse-green 2s infinite;
       }
 
-      @keyframes blink {
-        0%,
-        100% {
+      @keyframes pulse-green {
+        0% {
           opacity: 1;
+          transform: scale(1);
         }
         50% {
-          opacity: 0.3;
+          opacity: 0.5;
+          transform: scale(0.95);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
         }
       }
 
@@ -103,7 +111,6 @@
         max-width: 1920px;
         margin: 0 auto;
       }
-
       .section-title {
         padding: 10px 20px;
         font-size: 0.8rem;
@@ -231,9 +238,9 @@
         <div class="logo">
           <i class="fa-solid fa-tower-broadcast"></i> STREAM<span>HUB</span>
         </div>
-        <div class="user-counter">
+        <div class="user-counter" title="Usuários ativos agora">
           <i class="fa-solid fa-users"></i>
-          <span id="visitorCount">1</span> Usuários Conectados
+          <span id="visitorCount">Carregando...</span>
         </div>
       </div>
       <div class="controls">
@@ -270,16 +277,27 @@
     </div>
 
     <script>
-      function updateVisitors() {
+      // Lógica Sênior: Contador Estável e Persistente
+      function initCounter() {
         const countElement = document.getElementById("visitorCount");
-        let current = parseInt(countElement.innerText);
-        let change = Math.random() > 0.5 ? 1 : -1;
-        let next = current + change;
-        if (next < 1) next = 1;
-        if (next > 15) next = 12;
-        countElement.innerText = next;
+
+        // Baseamos o número no horário atual para que todos vejam algo parecido
+        const now = new Date();
+        const base = now.getHours() * 2 + Math.floor(now.getMinutes() / 10);
+        let visitors = 18 + (base % 15); // Inicia entre 18 e 33
+
+        countElement.innerText = visitors;
+
+        setInterval(() => {
+          // Mudança suave: apenas 1 pra cima ou 1 pra baixo, raramente
+          const rand = Math.random();
+          if (rand > 0.85) visitors++;
+          else if (rand < 0.15 && visitors > 15) visitors--;
+
+          countElement.innerText = visitors;
+        }, 8000);
       }
-      setInterval(updateVisitors, 5000);
+      initCounter();
 
       const liveStreams = [
         { name: "ACF Performance", id: "1kx--gAntwE" },
@@ -295,7 +313,6 @@
       function createCard(st, index, isLive, gridId) {
         const grid = document.getElementById(gridId);
         const uniqueId = isLive ? `live-${index}` : `off-${index}`;
-
         const src = isLive
           ? `https://www.youtube.com/embed/${st.id}?autoplay=1&mute=1&rel=0`
           : `https://www.youtube.com/embed/live?channel=${st.id}&autoplay=0&mute=1&rel=0`;
@@ -351,7 +368,6 @@
         document.documentElement.style.setProperty("--columns", cols);
       }
 
-      // Inicialização
       liveStreams.forEach((st, i) => createCard(st, i, true, "liveGrid"));
       offChannels.forEach((st, i) => createCard(st, i, false, "offGrid"));
     </script>
