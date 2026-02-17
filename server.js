@@ -1,28 +1,70 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const axios = require("axios");
 
 const app = express();
 
-// IMPORTANTE: permitir frontend conectar
 app.use(express.json());
 
-// criar servidor
 const server = http.createServer(app);
 
-// SOCKET CONFIG
 const io = new Server(server, {
   cors: {
     origin: "*",
-
     methods: ["GET", "POST"],
   },
 });
 
-// contador
+// ============================
+// CONFIG YOUTUBE API
+// ============================
+
+const API_KEY = "AIzaSyBDc6JwcvQis7fCsoNwhxMwXiNt_wy72Jw";
+
+const channels = [
+  {
+    name: "Cariani",
+    channelId: "UCPX0gLduKAfgr-HJENa7CFw",
+  },
+
+  {
+    name: "ACF Performance",
+    channelId: "UCvgSmIdI92W4KnP15fJwfwA",
+  },
+
+  {
+    name: "Rato Borrachudo",
+    channelId: "UCDt4dFdsJyjjA8mQULkOLLw",
+  },
+
+  {
+    name: "Gordox",
+    channelId: "UC0aogS8ogMaDUZKKKLKH8fg",
+  },
+
+  {
+    name: "Richard Rasmussen",
+    channelId: "UC13ikrGSy3E2AveqLAI9lqg",
+  },
+
+  {
+    name: "Inverno na Transamazônica",
+    channelId: "UC2qRum_4YU_5RHH83cU2O7Q",
+  },
+
+  {
+    name: "Tonimek",
+    channelId: "UCwRM1SXROyxSSJqrOTQzILw",
+  },
+];
+
+// ============================
+// CONTADOR ONLINE
+// ============================
+
 let onlineUsers = 0;
 
-// conexão
 io.on("connection", (socket) => {
   onlineUsers++;
 
@@ -39,14 +81,68 @@ io.on("connection", (socket) => {
   });
 });
 
+// ============================
+// VERIFICAR LIVES AUTOMATICO
+// ============================
+
+async function checkLives() {
+  try {
+    let result = [];
+
+    for (const ch of channels) {
+      const url =
+        `https://www.googleapis.com/youtube/v3/search` +
+        `?part=snippet` +
+        `&channelId=${ch.channelId}` +
+        `&eventType=live` +
+        `&type=video` +
+        `&key=${API_KEY}`;
+
+      const res = await axios.get(url);
+
+      if (res.data.items.length > 0) {
+        result.push({
+          name: ch.name,
+          live: true,
+          videoId: res.data.items[0].id.videoId,
+        });
+      } else {
+        result.push({
+          name: ch.name,
+          live: false,
+          channelId: ch.channelId,
+        });
+      }
+    }
+
+    io.emit("liveUpdate", result);
+
+    console.log("Lives verificadas:", result);
+  } catch (err) {
+    console.log("Erro ao verificar lives", err.message);
+  }
+}
+
+// verifica a cada 30 segundos
+
+setInterval(checkLives, 30000);
+
+// ============================
 // ROTA TESTE
+// ============================
+
 app.get("/", (req, res) => {
   res.send("Servidor StreamHub Online");
 });
 
-// PORTA PRODUÇÃO
+// ============================
+// START SERVER
+// ============================
+
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log("Servidor rodando na porta", PORT);
+
+  checkLives();
 });

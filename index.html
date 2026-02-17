@@ -256,10 +256,9 @@
 
       <div class="grid" id="offGrid"></div>
     </div>
-
     <script>
       /* ======================
-CONTADOR REAL
+SOCKET
 ====================== */
 
       const socket = io("https://stream-hub-6n48.onrender.com");
@@ -269,21 +268,75 @@ CONTADOR REAL
       });
 
       /* ======================
-STREAMS
+RECEBER STATUS
 ====================== */
 
-      const liveStreams = [
-        { name: "ACF Performance", id: "1kx--gAntwE" },
-        { name: "Rato Borrachudo", id: "XWjQEpRrgbE" },
-        { name: "Gordox", id: "krUGzTq00Z0" },
-        { name: "Inverno na Transamazônica", id: "YhQQq7HvJ-g" },
-      ];
+      socket.on("liveUpdate", (channels) => {
+        renderChannels(channels);
+      });
 
-      const offChannels = [
-        { name: "Renato Cariani", id: "UCcYzLCs3zrQIBVHYA1sK2sw" },
-        { name: "Richard Rasmussen", id: "UChlI_ODgqa8bcTfl96dkIDw" },
-        { name: "Tonimek", id: "Tonimek" },
-      ];
+      /* ======================
+RENDER
+====================== */
+
+      function renderChannels(channels) {
+        const liveGrid = document.getElementById("liveGrid");
+        const offGrid = document.getElementById("offGrid");
+
+        liveGrid.innerHTML = "";
+        offGrid.innerHTML = "";
+
+        let liveCount = 0;
+
+        channels.forEach((ch, index) => {
+          if (ch.live) {
+            liveCount++;
+
+            createCard(
+              {
+                name: ch.name,
+                id: ch.videoId,
+              },
+              index,
+              true,
+              "liveGrid",
+            );
+          } else {
+            createCard(
+              {
+                name: ch.name,
+              },
+              index,
+              false,
+              "offGrid",
+            );
+          }
+        });
+
+        /* mensagem se nenhuma live */
+
+        if (liveCount === 0) {
+          liveGrid.innerHTML = `
+
+<div style="
+grid-column: 1/-1;
+text-align:center;
+color:#666;
+padding:40px;
+">
+
+<i class="fa-solid fa-circle"
+style="font-size:40px;margin-bottom:10px;"></i>
+
+<br>
+
+Nenhuma live no momento
+
+</div>
+
+`;
+        }
+      }
 
       /* ======================
 CRIAR CARD
@@ -292,7 +345,7 @@ CRIAR CARD
       function createCard(st, index, isLive, gridId) {
         const grid = document.getElementById(gridId);
 
-        const uniqueId = isLive ? `live-${index}` : `off-${index}`;
+        const uniqueId = `${gridId}-${index}`;
 
         const card = document.createElement("div");
 
@@ -302,73 +355,102 @@ CRIAR CARD
 
         if (isLive) {
           videoContent = `
-      <iframe
-        id="frame-${uniqueId}"
-        src="https://www.youtube.com/embed/${st.id}?autoplay=1&mute=1"
-        allowfullscreen>
-      </iframe>
-    `;
+
+<iframe
+
+id="frame-${uniqueId}"
+
+src="https://www.youtube.com/embed/${st.id}?autoplay=1&mute=1"
+
+allowfullscreen>
+
+</iframe>
+
+`;
         } else {
           videoContent = `
-      <div style="
-        width:100%;
-        height:100%;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        flex-direction:column;
-        background:#000;
-        color:#666;
-        font-weight:bold;
-      ">
 
-        <i class="fa-solid fa-circle" style="color:#444;font-size:30px;margin-bottom:10px;"></i>
+<div style="
+width:100%;
+height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+background:#000;
+color:#666;
+font-weight:bold;
+">
 
-        OFFLINE
+<i class="fa-solid fa-circle"
+style="color:#444;font-size:30px;margin-bottom:10px;"></i>
 
-      </div>
-    `;
+OFFLINE
+
+</div>
+
+`;
         }
 
         card.innerHTML = `
 
-    <div class="video-container">
+<div class="video-container">
 
-      ${videoContent}
+${videoContent}
 
-    </div>
+</div>
 
-    <div class="info">
 
-      <div>
+<div class="info">
 
-        <div class="channel-name">${st.name}</div>
 
-        <div class="status ${isLive ? "live" : "off"}">
+<div>
 
-          <div class="dot ${isLive ? "live" : "off"}"></div>
 
-          ${isLive ? "AO VIVO" : "OFFLINE"}
+<div class="channel-name">${st.name}</div>
 
-        </div>
 
-      </div>
+<div class="status ${isLive ? "live" : "off"}">
 
-      <div class="actions">
 
-        ${
-          isLive
-            ? `<button class="btn-tool" onclick="refresh('${uniqueId}')">
-                 <i class="fa-solid fa-rotate"></i>
-               </button>`
-            : ""
-        }
+<div class="dot ${isLive ? "live" : "off"}"></div>
 
-      </div>
 
-    </div>
+${isLive ? "AO VIVO" : "OFFLINE"}
 
-  `;
+
+</div>
+
+
+</div>
+
+
+<div class="actions">
+
+
+${
+  isLive
+    ? `
+
+<button class="btn-tool"
+
+onclick="refresh('${uniqueId}')">
+
+<i class="fa-solid fa-rotate"></i>
+
+</button>
+
+`
+    : ""
+}
+
+
+</div>
+
+
+</div>
+
+`;
 
         grid.appendChild(card);
       }
@@ -386,14 +468,6 @@ FUNÇÕES
       function updateGrid(cols) {
         document.documentElement.style.setProperty("--columns", cols);
       }
-
-      /* ======================
-INIT
-====================== */
-
-      liveStreams.forEach((st, i) => createCard(st, i, true, "liveGrid"));
-
-      offChannels.forEach((st, i) => createCard(st, i, false, "offGrid"));
     </script>
   </body>
 </html>
