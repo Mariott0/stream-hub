@@ -251,7 +251,7 @@
 
       <div class="section-title">
         <i class="fa-solid fa-circle" style="color: #444; font-size: 10px"></i>
-        Canais em Monitoramento
+        Canais Offline
       </div>
 
       <div class="grid" id="offGrid"></div>
@@ -294,52 +294,81 @@ CRIAR CARD
 
         const uniqueId = isLive ? `live-${index}` : `off-${index}`;
 
-        const src = isLive
-          ? `https://www.youtube.com/embed/${st.id}?autoplay=1&mute=1`
-          : `https://www.youtube.com/embed/live?channel=${st.id}`;
-
         const card = document.createElement("div");
 
         card.className = "card";
 
+        let videoContent;
+
+        if (isLive) {
+          videoContent = `
+      <iframe
+        id="frame-${uniqueId}"
+        src="https://www.youtube.com/embed/${st.id}?autoplay=1&mute=1"
+        allowfullscreen>
+      </iframe>
+    `;
+        } else {
+          videoContent = `
+      <div style="
+        width:100%;
+        height:100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        flex-direction:column;
+        background:#000;
+        color:#666;
+        font-weight:bold;
+      ">
+
+        <i class="fa-solid fa-circle" style="color:#444;font-size:30px;margin-bottom:10px;"></i>
+
+        OFFLINE
+
+      </div>
+    `;
+        }
+
         card.innerHTML = `
 
-<div class="video-container">
+    <div class="video-container">
 
-<iframe id="frame-${uniqueId}" src="${src}" allowfullscreen></iframe>
+      ${videoContent}
 
-</div>
+    </div>
 
-<div class="info">
+    <div class="info">
 
-<div>
+      <div>
 
-<div class="channel-name">${st.name}</div>
+        <div class="channel-name">${st.name}</div>
 
-<div class="status ${isLive ? "live" : "off"}">
+        <div class="status ${isLive ? "live" : "off"}">
 
-<div class="dot ${isLive ? "live" : "off"}"></div>
+          <div class="dot ${isLive ? "live" : "off"}"></div>
 
-${isLive ? "AO VIVO" : "OFFLINE"}
+          ${isLive ? "AO VIVO" : "OFFLINE"}
 
-</div>
+        </div>
 
-</div>
+      </div>
 
-<div class="actions">
+      <div class="actions">
 
-<button class="btn-tool"
-onclick="refresh('${uniqueId}')">
+        ${
+          isLive
+            ? `<button class="btn-tool" onclick="refresh('${uniqueId}')">
+                 <i class="fa-solid fa-rotate"></i>
+               </button>`
+            : ""
+        }
 
-<i class="fa-solid fa-rotate"></i>
+      </div>
 
-</button>
+    </div>
 
-</div>
-
-</div>
-
-`;
+  `;
 
         grid.appendChild(card);
       }
