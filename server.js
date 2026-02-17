@@ -67,12 +67,16 @@ const channels = [
 
 let onlineUsers = 0;
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   onlineUsers++;
 
   console.log("Usuário conectado:", onlineUsers);
 
   io.emit("updateUsers", onlineUsers);
+
+  // ENVIA STATUS DAS LIVES IMEDIATAMENTE
+
+  await checkLives();
 
   socket.on("disconnect", () => {
     onlineUsers--;
