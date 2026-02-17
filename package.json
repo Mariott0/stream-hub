@@ -1,0 +1,27 @@
+{
+  "name": "stream-hub",
+  "version": "1.0.0",
+  "description": "StreamHub contador de usuários online",
+  "main": "server.js",
+
+  "scripts": {
+    "start": "node server.js"
+  },
+
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mariott0/stream-hub.git"
+  },
+
+  "author": "Nathan Mariotto",
+  "license": "ISC",
+
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.8.3"
+  },
+
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -10,10 +10,14 @@
       type="image/png"
       href="https://cdn-icons-png.flaticon.com/512/1384/1384060.png"
     />
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+
+    <!-- SOCKET.IO CLIENT -->
+    <script src="https://stream-hub-6n48.onrender.com"></script>
 
     <style>
       :root {
@@ -32,6 +36,7 @@
         box-sizing: border-box;
         font-family: "Inter", sans-serif;
       }
+
       body {
         background: var(--bg-body);
         color: var(--text-main);
@@ -55,6 +60,7 @@
         display: flex;
         flex-direction: column;
       }
+
       .logo {
         font-size: 1.5rem;
         font-weight: 800;
@@ -62,42 +68,21 @@
         align-items: center;
         gap: 10px;
       }
+
       .logo span {
         color: var(--accent);
       }
 
-      /* CONTADOR REFEITO: MAIS ESTÁVEL E PROFISSIONAL */
       .user-counter {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: #00ff88;
-        font-weight: 700;
+        font-weight: 600;
         display: flex;
         align-items: center;
         gap: 6px;
-        margin-top: 4px;
-        letter-spacing: 0.5px;
-        background: rgba(0, 255, 136, 0.05);
-        padding: 2px 8px;
-        border-radius: 4px;
-        width: fit-content;
-      }
-      .user-counter i {
-        animation: pulse-green 2s infinite;
-      }
-
-      @keyframes pulse-green {
-        0% {
-          opacity: 1;
-          transform: scale(1);
-        }
-        50% {
-          opacity: 0.5;
-          transform: scale(0.95);
-        }
-        100% {
-          opacity: 1;
-          transform: scale(1);
-        }
+        margin-top: 2px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
       }
 
       .controls {
@@ -111,11 +96,11 @@
         max-width: 1920px;
         margin: 0 auto;
       }
+
       .section-title {
         padding: 10px 20px;
         font-size: 0.8rem;
         font-weight: 900;
-        color: var(--text-main);
         text-transform: uppercase;
         letter-spacing: 2px;
         display: flex;
@@ -136,7 +121,6 @@
         border-radius: 12px;
         overflow: hidden;
         border: 1px solid #222;
-        transition: 0.3s;
       }
 
       .video-container {
@@ -145,6 +129,7 @@
         aspect-ratio: 16 / 9;
         background: #000;
       }
+
       iframe {
         width: 100%;
         height: 100%;
@@ -158,16 +143,17 @@
         align-items: center;
         background: #181818;
       }
+
       .channel-name {
         font-weight: bold;
         font-size: 0.85rem;
-        color: #eee;
       }
 
       .actions {
         display: flex;
         gap: 8px;
       }
+
       .btn-tool {
         background: #2a2a2a;
         border: none;
@@ -176,16 +162,11 @@
         height: 36px;
         border-radius: 6px;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
+
       .btn-tool:hover {
         background: #333;
         color: var(--accent);
-      }
-      .btn-tool.active-audio {
-        background: var(--accent);
       }
 
       .status {
@@ -195,9 +176,11 @@
         gap: 5px;
         font-weight: 900;
       }
+
       .status.live {
         color: var(--accent);
       }
+
       .status.off {
         color: var(--offline);
       }
@@ -207,22 +190,13 @@
         height: 7px;
         border-radius: 50%;
       }
+
       .dot.live {
         background: var(--accent);
-        animation: pulse 1.5s infinite;
-      }
-      .dot.off {
-        background: var(--offline);
       }
 
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.3;
-        }
+      .dot.off {
+        background: var(--offline);
       }
 
       @media (max-width: 900px) {
@@ -232,17 +206,22 @@
       }
     </style>
   </head>
+
   <body>
     <header>
       <div class="logo-area">
         <div class="logo">
-          <i class="fa-solid fa-tower-broadcast"></i> STREAM<span>HUB</span>
+          <i class="fa-solid fa-tower-broadcast"></i>
+          STREAM<span>HUB</span>
         </div>
-        <div class="user-counter" title="Usuários ativos agora">
+
+        <div class="user-counter">
           <i class="fa-solid fa-users"></i>
-          <span id="visitorCount">Carregando...</span>
+          <span id="visitorCount">0</span>
+          Usuários Conectados
         </div>
       </div>
+
       <div class="controls">
         <select
           onchange="updateGrid(this.value)"
@@ -267,37 +246,31 @@
         <i class="fa-solid fa-circle" style="color: red; font-size: 10px"></i>
         Transmissões Ativas
       </div>
+
       <div class="grid" id="liveGrid"></div>
 
       <div class="section-title">
         <i class="fa-solid fa-circle" style="color: #444; font-size: 10px"></i>
         Canais em Monitoramento
       </div>
+
       <div class="grid" id="offGrid"></div>
     </div>
 
     <script>
-      // Lógica Sênior: Contador Estável e Persistente
-      function initCounter() {
-        const countElement = document.getElementById("visitorCount");
+      /* ======================
+CONTADOR REAL
+====================== */
 
-        // Baseamos o número no horário atual para que todos vejam algo parecido
-        const now = new Date();
-        const base = now.getHours() * 2 + Math.floor(now.getMinutes() / 10);
-        let visitors = 18 + (base % 15); // Inicia entre 18 e 33
+      const socket = io("https://stream-hub-6n48.onrender.com");
 
-        countElement.innerText = visitors;
+      socket.on("updateUsers", (count) => {
+        document.getElementById("visitorCount").innerText = count;
+      });
 
-        setInterval(() => {
-          // Mudança suave: apenas 1 pra cima ou 1 pra baixo, raramente
-          const rand = Math.random();
-          if (rand > 0.85) visitors++;
-          else if (rand < 0.15 && visitors > 15) visitors--;
-
-          countElement.innerText = visitors;
-        }, 8000);
-      }
-      initCounter();
+      /* ======================
+STREAMS
+====================== */
 
       const liveStreams = [
         { name: "ACF Performance", id: "1kx--gAntwE" },
@@ -310,57 +283,72 @@
 
       const offChannels = [{ name: "Tonimek", id: "Tonimek" }];
 
+      /* ======================
+CRIAR CARD
+====================== */
+
       function createCard(st, index, isLive, gridId) {
         const grid = document.getElementById(gridId);
+
         const uniqueId = isLive ? `live-${index}` : `off-${index}`;
+
         const src = isLive
-          ? `https://www.youtube.com/embed/${st.id}?autoplay=1&mute=1&rel=0`
-          : `https://www.youtube.com/embed/live?channel=${st.id}&autoplay=0&mute=1&rel=0`;
+          ? `https://www.youtube.com/embed/${st.id}?autoplay=1&mute=1`
+          : `https://www.youtube.com/embed/live?channel=${st.id}`;
 
         const card = document.createElement("div");
+
         card.className = "card";
+
         card.innerHTML = `
-            <div class="video-container">
-                <iframe id="frame-${uniqueId}" src="${src}" allowfullscreen></iframe>
-            </div>
-            <div class="info">
-                <div>
-                    <div class="channel-name">${st.name}</div>
-                    <div class="status ${isLive ? "live" : "off"}">
-                        <div class="dot ${isLive ? "live" : "off"}"></div> 
-                        ${isLive ? "AO VIVO" : "OFFLINE / MONITORANDO"}
-                    </div>
-                </div>
-                <div class="actions">
-                    <button class="btn-tool" id="mute-${uniqueId}" onclick="toggleMute('${uniqueId}')">
-                        <i class="fa-solid fa-volume-xmark"></i>
-                    </button>
-                    <button class="btn-tool" onclick="refresh('${uniqueId}')">
-                        <i class="fa-solid fa-rotate"></i>
-                    </button>
-                </div>
-            </div>`;
+
+<div class="video-container">
+
+<iframe id="frame-${uniqueId}" src="${src}" allowfullscreen></iframe>
+
+</div>
+
+<div class="info">
+
+<div>
+
+<div class="channel-name">${st.name}</div>
+
+<div class="status ${isLive ? "live" : "off"}">
+
+<div class="dot ${isLive ? "live" : "off"}"></div>
+
+${isLive ? "AO VIVO" : "OFFLINE"}
+
+</div>
+
+</div>
+
+<div class="actions">
+
+<button class="btn-tool"
+onclick="refresh('${uniqueId}')">
+
+<i class="fa-solid fa-rotate"></i>
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
         grid.appendChild(card);
       }
 
-      function toggleMute(uniqueId) {
-        const frame = document.getElementById(`frame-${uniqueId}`);
-        const btn = document.getElementById(`mute-${uniqueId}`);
-        let src = frame.src;
+      /* ======================
+FUNÇÕES
+====================== */
 
-        if (src.includes("mute=1")) {
-          frame.src = src.replace("mute=1", "mute=0");
-          btn.classList.add("active-audio");
-          btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
-        } else {
-          frame.src = src.replace("mute=0", "mute=1");
-          btn.classList.remove("active-audio");
-          btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
-        }
-      }
+      function refresh(id) {
+        const frame = document.getElementById(`frame-${id}`);
 
-      function refresh(uniqueId) {
-        const frame = document.getElementById(`frame-${uniqueId}`);
         frame.src = frame.src;
       }
 
@@ -368,7 +356,12 @@
         document.documentElement.style.setProperty("--columns", cols);
       }
 
+      /* ======================
+INIT
+====================== */
+
       liveStreams.forEach((st, i) => createCard(st, i, true, "liveGrid"));
+
       offChannels.forEach((st, i) => createCard(st, i, false, "offGrid"));
     </script>
   </body>
