@@ -24,11 +24,6 @@ const API_KEY = "AIzaSyBDc6JwcvQis7fCsoNwhxMwXiNt_wy72Jw";
 
 const channels = [
   {
-    name: "Cariani",
-    channelId: "UCPX0gLduKAfgr-HJENa7CFw",
-  },
-
-  {
     name: "ACF Performance",
     channelId: "UCvgSmIdI92W4KnP15fJwfwA",
   },
@@ -42,10 +37,17 @@ const channels = [
     name: "Gordox",
     channelId: "UC0aogS8ogMaDUZKKKLKH8fg",
   },
-
+  {
+    name: "Tonimek",
+    channelId: "UCwRM1SXROyxSSJqrOTQzILw",
+  },
   {
     name: "Richard Rasmussen",
     channelId: "UC13ikrGSy3E2AveqLAI9lqg",
+  },
+  {
+    name: "Cariani",
+    channelId: "UCPX0gLduKAfgr-HJENa7CFw",
   },
 
   {
@@ -54,8 +56,8 @@ const channels = [
   },
 
   {
-    name: "Tonimek",
-    channelId: "UCwRM1SXROyxSSJqrOTQzILw",
+    name: "Nathan Mariotto",
+    channelId: "UChVM0HxSPi3ClJVPWCGM5Og",
   },
 ];
 
@@ -91,9 +93,7 @@ io.on("connection", async (socket) => {
 
 async function checkLives() {
   try {
-    let result = [];
-
-    for (const ch of channels) {
+    const requests = channels.map((ch) => {
       const url =
         `https://www.googleapis.com/youtube/v3/search` +
         `?part=snippet` +
@@ -102,28 +102,41 @@ async function checkLives() {
         `&type=video` +
         `&key=${API_KEY}`;
 
-      const res = await axios.get(url);
+      return axios
+        .get(url)
 
-      if (res.data.items.length > 0) {
-        result.push({
-          name: ch.name,
-          live: true,
-          videoId: res.data.items[0].id.videoId,
+        .then((res) => {
+          if (res.data.items.length > 0) {
+            return {
+              name: ch.name,
+              live: true,
+              videoId: res.data.items[0].id.videoId,
+            };
+          }
+
+          return {
+            name: ch.name,
+            live: false,
+            channelId: ch.channelId,
+          };
+        })
+
+        .catch(() => {
+          return {
+            name: ch.name,
+            live: false,
+            channelId: ch.channelId,
+          };
         });
-      } else {
-        result.push({
-          name: ch.name,
-          live: false,
-          channelId: ch.channelId,
-        });
-      }
-    }
+    });
+
+    const result = await Promise.all(requests);
 
     io.emit("liveUpdate", result);
 
     console.log("Lives verificadas:", result);
   } catch (err) {
-    console.log("Erro ao verificar lives", err.message);
+    console.log("Erro geral:", err.message);
   }
 }
 
