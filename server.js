@@ -24,11 +24,6 @@ const API_KEY = "AIzaSyBDc6JwcvQis7fCsoNwhxMwXiNt_wy72Jw";
 
 const channels = [
   {
-    name: "Cariani",
-    channelId: "UCPX0gLduKAfgr-HJENa7CFw",
-  },
-
-  {
     name: "ACF Performance",
     channelId: "UCvgSmIdI92W4KnP15fJwfwA",
   },
@@ -42,7 +37,10 @@ const channels = [
     name: "Gordox",
     channelId: "UC0aogS8ogMaDUZKKKLKH8fg",
   },
-
+  {
+    name: "Cariani",
+    channelId: "UCPX0gLduKAfgr-HJENa7CFw",
+  },
   {
     name: "Richard Rasmussen",
     channelId: "UC13ikrGSy3E2AveqLAI9lqg",
@@ -56,6 +54,10 @@ const channels = [
   {
     name: "Tonimek",
     channelId: "UCwRM1SXROyxSSJqrOTQzILw",
+  },
+  {
+    name: "Nathan Mariotto",
+    channelId: "UChVM0HxSPi3ClJVPWCGM5Og",
   },
 ];
 
@@ -125,7 +127,7 @@ async function checkLives() {
 
 // verifica a cada 30 segundos
 
-setInterval(checkLives, 30000);
+setInterval(checkLives, 3000);
 
 // ============================
 // ROTA TESTE
