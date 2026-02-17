@@ -142,7 +142,7 @@ async function checkLives() {
 
 // verifica a cada 30 segundos
 
-setInterval(checkLives, 30000);
+setInterval(checkLives, 15000);
 
 // ============================
 // ROTA TESTE
